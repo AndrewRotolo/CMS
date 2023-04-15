@@ -5,12 +5,10 @@ const cTable = require('console.table');
 const db = mysql.createConnection(
     {
         host: 'localhost',
-        user: '',
-        password: '',
+        user: 'root',
+        password: 'syitbwabg8675309',
         database: 'cms_db'
-    },
-    console.log('Connected to database')
-);
+    });
 
 function mainMenu() {
     //primary function for the application. Directs to other functions that handle individual database queries
@@ -24,7 +22,7 @@ function mainMenu() {
     ])
     .then(function (response) {
         //sends the user to the relevant database functions. Currently just the framework (edit this comment once that changes)
-        switch (response){
+        switch (response.start){
             case 'View all departments' :
                 viewDepartments();
                 break;
@@ -47,29 +45,63 @@ function mainMenu() {
                 updateEmployeeRole();
                 break;
             default:
-                console.log(`Andrew broke something. User chose ${response}. Fix it.`);
+                console.log(`Andrew broke something. User chose ${response.start}. Fix it.`);
                 break;
         }
+        return;
     })
 }
-
+//I may be able to use inquirer to imitate a "press to continue" functionality. Will look into it after achieving MVP.
 function viewDepartments() {
     db.query('SELECT * FROM departments', function (err, results) {
-        console.table([results]);
+        console.table(results);
         mainMenu();
+        return;
     })
 
 };
 
 function viewRoles() {
+    db.query('SELECT * FROM roles', function (err, results) {
+        console.table(results);
+        mainMenu();
+        return;
+    })
     
 };
 
 function viewEmployees() {
+    db.query('SELECT * FROM employees', function (err, results) {
+        console.table(results);
+        mainMenu();
+        return;
+    })
 
 };
 
 function addDepartment() {
+    db.query('SELECT * FROM departments', function (err, results) {
+        console.table(results);
+    })
+
+    inquirer.prompt([
+        {
+            name: 'addDepartment',
+            message: 'What is the new department\'s name?',
+            type: 'input'
+        }
+    ])
+    .then(function(response) {
+        const userInput = response.addDepartment;
+        db.query('INSERT INTO departments (department_name) VALUES (?)', userInput, function (err, results) {
+            if (err) {
+                console.log(err);
+            }
+        })
+        db.query('SELECT * FROM departments', function (err, results) {
+            console.table(results);
+        })
+    })
 
 };
 
@@ -84,3 +116,5 @@ function addEmployee() {
 function updateEmployeeRole() {
 
 };
+
+mainMenu();
