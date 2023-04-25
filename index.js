@@ -215,7 +215,57 @@ function addEmployee() {
 };
 
 function updateEmployeeRole() {
+    db.query('SELECT * FROM roles', function (err, results) {
+        console.table(results);
+    });
+    db.query('SELECT * FROM employees', function (err, results) {
+        console.table(results);
+    })
 
+    inquirer.prompt([
+        {
+            name: 'employeeID',
+            message: 'Which employee ID do you wish to update (see "employees" table above)?',
+            type: 'input'
+        },
+        {
+            name: 'newRole',
+            message: 'What is their new role ID (see "roles" table above)?',
+            type: 'input'
+        }
+    ])
+    .then(function(response) {
+        let ID = response.employeeID;
+        let role = response.newRole;
+        //gives a more useful error message if they put gibberish in the response
+        if (isNaN(ID)) {
+            console.log('ERROR: The employee\'s ID must be a number. Try again');
+            mainMenu();
+            return;
+        }
+        //same as last if statement
+        if(isNaN(role)) {
+            console.log('ERROR: New role ID must be a number. Try again');
+            mainMenu();
+            return;
+        }
+
+        db.query('UPDATE employees SET role_id = ? WHERE id = ?', [ID, role], function (err, results) {
+            //since I don't have any checks for if the IDs match actual database info, this will give a useful error message and reset the program if the user screws up.
+            if(err) {
+                console.log('Database Error - Did you input everything correctly? Try again');
+                mainMenu();
+                return;
+            }
+
+        })
+
+        db.query('SELECT * FROM employees', function (err, results) {
+            console.table(results);
+            mainMenu();
+            return;
+        })
+    })
 };
 //This actually starts the program. I *may* have forgotten to actually call the main function when first testing.
 mainMenu();
